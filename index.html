@@ -1,0 +1,351 @@
+      
+<!DOCTYPE html>
+<html>
+<head>
+<title>Drag HTML Elements</title>
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script type="text/javascript">
+
+var objects = new Array();
+
+var DragHandler = {
+
+// private property.
+_oElem : null,
+
+// public method. Attach drag handler to an element.
+attach : function(oElem) {
+		oElem.onmousedown = DragHandler._dragBegin;
+		// callbacks
+		oElem.dragBegin = new Function();
+		oElem.drag = new Function();
+		oElem.dragEnd = new Function();
+		return oElem;
+},
+
+// private method. Begin drag process.
+_dragBegin : function(e) {
+		var oElem = DragHandler._oElem = this;
+		if (isNaN(parseInt(oElem.style.left))) { oElem.style.left = '0px'; }
+		if (isNaN(parseInt(oElem.style.top))) { oElem.style.top = '0px'; }
+		var x = parseInt(oElem.style.left);
+		var y = parseInt(oElem.style.top);
+		e = e ? e : window.event;
+		oElem.mouseX = e.clientX;
+		oElem.mouseY = e.clientY;
+		oElem.dragBegin(oElem, x, y);
+		document.onmousemove = DragHandler._drag;
+		document.onmouseup = DragHandler._dragEnd;
+		return false;
+},
+
+// private method. Drag (move) element.
+_drag : function(e) {
+		var oElem = DragHandler._oElem;
+		var x = parseInt(oElem.style.left);
+		var y = parseInt(oElem.style.top);
+		e = e ? e : window.event;
+		oElem.style.left = x + (e.clientX - oElem.mouseX) + 'px';
+		oElem.style.top = y + (e.clientY - oElem.mouseY) + 'px';
+		oElem.mouseX = e.clientX;
+		oElem.mouseY = e.clientY;
+		oElem.drag(oElem, x, y);
+		return false;
+},
+
+// private method. Stop drag process.
+_dragEnd : function() {
+		var oElem = DragHandler._oElem;
+		var x = parseInt(oElem.style.left);
+		var y = parseInt(oElem.style.top);
+		oElem.dragEnd(oElem, x, y);
+		document.onmousemove = null;
+		document.onmouseup = null;
+		DragHandler._oElem = null;
+	}
+};
+
+// =============
+
+function beginScript() {
+  function begin (element, x, y) {
+  		var s = '#' + element.id + ' (begin drag)' + ' x:' + x + ', y:' + y;
+  		updateInfo(s);
+  		updatePos(x, y);
+
+  		$('#'+element.id).addClass('active');
+  		var id = element.id.replace('dragable', '');
+  		console.log("#panel"+id);
+  		$('#panel'+id).addClass('active');
+  }
+
+  function drag (element, x, y) {
+  		var s = '#' + element.id + ' (dragging)' + ' x:' + x + ', y:' + y;
+  		updateInfo(s);
+  		updatePos(x, y);
+  }
+
+  function end (element, x, y) {
+  		var s = '#' + element.id + ' (end drag)' + ' x:' + x + ', y:' + y;
+  		updateInfo(s);
+  		updatePos(element.id.replace('dragable',''), x, y);
+
+  		$('#'+element.id).removeClass('active');
+  		var id = element.id.replace('dragable', '');
+  		$('#panel'+id).removeClass('active');
+  }
+
+  function updateInfo(s) {
+  		document.getElementById('info').innerHTML = s;
+  }
+
+  function updatePos(id, x, y) {
+  		$('#posX'+id).val(x);
+  		$('#posY'+id).val(y);
+
+  		console.log(id+"/"+"x"+"y");
+  }
+
+  // var obj = document.getElementById('dragable1');
+  var objs = $('.dragable');
+  console.log(objs.length);
+
+  objects = new Array();
+
+	for (var i=0; i<objs.length; i++) {
+  
+		var dragable1 = DragHandler.attach(objs[i]);
+
+	 	dragable1.dragBegin = begin;
+	 	dragable1.drag = drag;
+	 	dragable1.dragEnd = end;
+
+	 	objects.push(dragable1);
+	}
+
+	console.log(objects);
+}
+
+// =============
+
+// Multiple onload function created by: Simon Willison
+// http://simon.incutio.com/archive/2004/05/26/addLoadEvent
+function addLoadEvent(func) {
+  var oldonload = window.onload;
+  if (typeof window.onload != 'function') {
+    window.onload = func;
+  } else {
+    window.onload = function() {
+      if (oldonload) {
+        oldonload();
+      }
+      func();
+    }
+  }
+}
+
+addLoadEvent(function() {
+  beginScript();
+});
+
+
+function submitSize(id) {
+	var imageW = $('#imgW'+id).val();
+	var imageH = $('#imgH'+id).val();
+
+	var obj = $('#dragable'+id);
+	obj.css('width', imageW+"px");
+	obj.css('height', imageH+"px");
+}
+
+function sizeUp(id) {
+	var obj = $('#dragable'+id);
+	var width = obj.css('width').replace('px', '');
+	var height = obj.css('height').replace('px', '');
+
+	width  = Number(width)*1.25;
+	height = Number(height)*1.25;
+
+	obj.css('width', width + 'px');
+	obj.css('height', height + 'px');
+	console.log(width + "/" + height);
+	$('#zoom'+id).text(width/100.0);
+}
+
+function sizeDown(id) {
+	var obj = $('#dragable'+id);
+	var width = obj.css('width').replace('px', '');
+	var height = obj.css('height').replace('px', '');
+
+	width  = Number(width)*0.75;
+	height = Number(height)*0.75;
+	obj.css('width', width + 'px');
+	obj.css('height', height + 'px');
+	console.log(width + "/" + height);
+	$('#zoom'+id).text(width/100.0);
+}
+
+
+function sizeDefault(id) {
+	var obj = $('#dragable'+id);
+
+	obj.css('width', '100px');
+	obj.css('height', '100px');
+	$('#zoom'+id).text(1.00);
+}
+
+
+function rotatePlus(id) {
+	var obj = $('#dragable'+id);
+	var matrix = obj.css('-webkit-transform');
+	var values = matrix.split('(')[1].split(')')[0].split(',');
+    var a = values[0];
+    var b = values[1];
+    var angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
+
+	console.log(angle);
+	angle = Number(angle)+10;
+	obj.css('-webkit-transform', 'rotate('+angle+'deg)');
+	$('#rotate'+id).text(angle);
+}
+
+function rotateMinus(id) {
+	var obj = $('#dragable'+id);
+	var matrix = obj.css('-webkit-transform');
+	var values = matrix.split('(')[1].split(')')[0].split(',');
+    var a = values[0];
+    var b = values[1];
+    var angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
+
+	console.log(angle);
+	angle = Number(angle)-10;
+	obj.css('-webkit-transform', 'rotate('+angle+'deg)');
+	$('#rotate'+id).text(angle);
+}
+
+function rotateDefault(id) {
+	var obj = $('#dragable'+id);
+	obj.css('-webkit-transform', 'rotate(0deg)');
+	$('#rotate'+id).text(0);
+}
+
+
+function appendObj() {
+	var new_index = objects.length+1;
+
+	$('#canvas').append('<div id="dragable'+new_index+'" class="dragable"><br>Object'+new_index+'</div>');
+
+	$('#control').append('<div class="panel" id="panel'+new_index+'">' + 
+		'<p>Object'+new_index+'の画像情報</p>' + 
+		'<p>' + 
+			'画像のwidth:<input type="text" id="imgW'+new_index+'" value="100">px<br>' + 
+			'画像のheight:<input type="text" id="imgH'+new_index+'" value="100">px<br>' +
+			'<button onClick="submitSize('+new_index+')">画像サイズ確定</button>' +
+		'</p>' + 
+		'<hr>' + 
+		'<p>X座標:<input type="text" id="posX'+new_index+'" value="0"></p>' +
+		'<p>Y座標:<input type="text" id="posY'+new_index+'" value="0"></p>' + 
+		'<button onClick="sizeUp('+new_index+')">サイズ++</button>' + 
+		'<button onClick="sizeDown('+new_index+')">サイズ--</button>' +
+		'<button onClick="sizeDefault('+new_index+')">元のサイズに</button><br>' +
+		'比率:<span id="zoom'+new_index+'">1.00</span><br><br>' +
+		'<button onClick="rotatePlus('+new_index+')">右回り回転</button>' +
+		'<button onClick="rotateMinus('+new_index+')">左回り回転</button>' +
+		'<button onClick="rotateDefault('+new_index+')">回転リセット</button><br>' +
+		'回転角度:<span id="rotate'+new_index+'">0</span>' +
+		'</div>');
+
+	beginScript();
+}
+
+
+
+
+</script>
+
+<style>
+.dragable {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100px; 
+	height: 100px; 
+	background: silver; 
+	border: 1px dashed red; 
+	font-size: 11px; 
+	padding: 5px; 
+	text-align: center;
+	-webkit-transform: rotate(0deg);
+
+	z-index:50;
+}
+
+#canvas {
+	position: relative;
+	top:10px;
+	left:5px;
+	width:320px;
+	height:568px;
+	background: #ebebeb;
+	float: left;
+}
+
+#control {
+	position: relative;
+	width: 300px;
+	margin-left:400px;
+}
+
+.panel {
+	width: 100%;
+	padding: 5px 0;
+	margin-bottom: 15px;
+	background: #ebebeb;
+}
+
+.active {
+	background: #ccc;
+}
+
+</style>
+</head>
+<body>
+
+
+<div id="info">ボックス/イメージをドラッグして移動してください...</div>
+<div id="canvas">
+	<div id="dragable1" class="dragable"><br>Object1</div>
+</div>
+
+<div id="control">
+	<div id="append-control">
+		<button onClick="appendObj()">オブジェクトを追加する</button>
+	</div>
+
+	<div class="panel" id="panel1">
+		<p>Object1の画像情報</p>
+		<p>
+			画像のwidth:<input type="text" id="imgW1" value="100">px<br>
+			画像のheight:<input type="text" id="imgH1" value="100">px<br>
+			<button onClick="submitSize(1)">画像サイズ確定</button>
+		</p>
+		
+		<hr>
+		<p>X座標:<input type="text" id="posX1" value="0"></p>
+		<p>Y座標:<input type="text" id="posY1" value="0"></p>
+		<button onClick="sizeUp(1)">サイズ++</button>
+		<button onClick="sizeDown(1)">サイズ--</button>
+		<button onClick="sizeDefault(1)">元のサイズに</button><br>
+		比率:<span id="zoom1">1.00</span><br><br>
+		<button onClick="rotatePlus(1)">右回り回転</button>
+		<button onClick="rotateMinus(1)">左回り回転</button>
+		<button onClick="rotateDefault(1)">回転リセット</button><br>
+		回転角度:<span id="rotate1">0</span>
+	</div>
+
+</div>
+
+
+</body>
+</html>
+                  
