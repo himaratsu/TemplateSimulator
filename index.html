@@ -253,9 +253,22 @@ function appendObj() {
 		'<button onClick="rotateMinus('+new_index+')">左回り回転</button>' +
 		'<button onClick="rotateDefault('+new_index+')">回転リセット</button><br>' +
 		'回転角度:<span id="rotate'+new_index+'">0</span>' +
+		'<br>' +
+		'<button onClick="deleteObject('+new_index+')">削除する</button>' +
 		'</div>');
 
 	beginScript();
+}
+
+
+function deleteObject(id) {
+	var ret = confirm('Object'+id+'を本当に削除しますか？');
+	if (ret == true){
+		$('#dragable'+id).remove();
+		$('#panel'+id).remove();
+		beginScript();
+	}
+
 }
 
 
@@ -341,6 +354,8 @@ function appendObj() {
 		<button onClick="rotateMinus(1)">左回り回転</button>
 		<button onClick="rotateDefault(1)">回転リセット</button><br>
 		回転角度:<span id="rotate1">0</span>
+		<br>
+		<button onClick="deleteObject(1)">削除する</button>
 	</div>
 
 </div>
