@@ -236,6 +236,13 @@ function appendObj() {
 
 	$('#canvas').append('<div id="dragable'+new_index+'" class="dragable"><br>Object'+new_index+'</div>');
 
+	console.log($('#dragable'+new_index));
+	var new_obj = $('#dragable'+new_index);
+	var z_index = new_obj.css('z-index');
+	z_index = Number(z_index) + new_index;
+	new_obj.css('z-index', z_index);
+
+
 	$('#control').append('<div class="panel" id="panel'+new_index+'">' + 
 		'<p>Object'+new_index+'の画像情報</p>' + 
 		'<p>' + 
@@ -291,7 +298,7 @@ function deleteObject(id) {
 	text-align: center;
 	-webkit-transform: rotate(0deg);
 
-	z-index:50;
+	z-index:101;
 }
 
 #canvas {
@@ -299,7 +306,8 @@ function deleteObject(id) {
 	top:10px;
 	left:5px;
 	width:320px;
-	height:568px;
+	height:427px;
+	padding:0;
 	background: #ebebeb;
 	float: left;
 }
